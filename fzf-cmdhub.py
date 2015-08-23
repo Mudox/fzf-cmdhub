@@ -18,7 +18,7 @@ class Hub:
 # - Use TAB characters to separate titles and commands.
 # - Comment lines (start with a '#') and empty lines are ignored
 
-Edit fzf-cmdhub data file\t\t${EDITOR:-nvim} ~/.fzf-cmdhub
+Edit fzf-cmdhub data file\t\t${EDITOR:-vi} ~/.fzf-cmdhub
 '''
 
     DATA_FILE_PATH = os.path.expanduser('~/.fzf-cmdhub')
