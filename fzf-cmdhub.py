@@ -22,8 +22,8 @@ class Hub:
 Edit fzf-cmdhub data file\t\t${EDITOR:-vi} ~/.fzf-cmdhub
 '''
 
-    MENU_PATH = os.path.expanduser('~/.fzf-cmdhub')
-    JOBS_DIR= os.path.expanduser('~/.fzf-cmdhub-cmds')
+    MENU_PATH = os.path.expanduser('~/.fzf-cmdhub-menu')
+    JOBS_DIR= os.path.expanduser('~/.fzf-cmdhub-jobs')
 
     # one or more Tabs separated line
     MENU_ITEM_PAT = r'^[^\t]+\t+[^\t]+$'
