@@ -6,6 +6,7 @@ import re
 import subprocess
 import sys
 import argparse
+import glob
 
 # core class
 # {{{1
@@ -23,35 +24,42 @@ Edit fzf-cmdhub data file\t\t${EDITOR:-vi} ~/.fzf-cmdhub
 '''
 
     MENU_PATH = os.path.expanduser('~/.fzf-cmdhub-menu')
-    JOBS_DIR= os.path.expanduser('~/.fzf-cmdhub-jobs')
+    JOBS_DIR = os.path.expanduser('~/.fzf-cmdhub-jobs')
+    AUTOLOAD_DIR = JOBS_DIR + '/autoload'
 
     # one or more Tabs separated line
     MENU_ITEM_PAT = r'^[^\t]+\t+[^\t]+$'
     SEP_PAT = r'\t+'
 
     def __init__(self):
-        # check data file avalability
+        # check menu file avalability
         # if not exists, create & populate it with initial content
         if not os.path.exists(self.MENU_PATH):
             with open(self.MENU_PATH, 'w') as f:
                 f.write(self.DATA_FILE_TEMPLATE)
+
+        if not os.path.exists(self.JOBS_DIR):
+            subprocess.call('mkdir -p' + self.AUTOLOAD_DIR, shell=True)
 
         with open(self.MENU_PATH, 'r') as data_file:
             lines = [
                 l for l in data_file if re.match(
                     self.MENU_ITEM_PAT, l)]
 
-            # check for duplicate title
             title_cmd_pairs = map(
                 lambda l: re.split(
                     self.SEP_PAT, l), lines)
+
+            title_cmd_pairs += self.autoload_pairs()
+
+            # check for duplicate title
             sorted_titles = sorted([p[0] for p in title_cmd_pairs])
             for i in range(len(sorted_titles) - 1):
                 if sorted_titles[i] == sorted_titles[i + 1]:
                     sys.stderr.write(
                         '* Found duplicate title: {} *\n'.format(sorted_titles[i]))
 
-            # translate special cmd lines
+            # hangle sharp lines
             def translate_sharp_line(line):
                 line = line.strip()
 
@@ -69,11 +77,44 @@ Edit fzf-cmdhub data file\t\t${EDITOR:-vi} ~/.fzf-cmdhub
                         line)
 
                 return line
+
             title_cmd_pairs = map(
                 lambda p: (p[0], translate_sharp_line(p[1])),
                 title_cmd_pairs)
 
             self.core_dict = dict(title_cmd_pairs)
+
+    def autoload_pairs(self):
+        """
+        parse files under .fzf-cmdhub-jobs/autoload
+        return: a list of 2-tuple (title, cmd_line)
+        """
+
+        title_cmd_pairs = []
+
+        files = glob.glob('*.[bes]')
+        if len(files) == 0:
+            return {}
+
+        for fn in files:
+            # read first 2 lines
+            with open(fn) as fp:
+                first_2_lines = [fp.readline(), fp.readline()]
+
+            # collect title if any
+            for l in first_2_lines:
+                if l.startswith('#cmdhub: '):
+                    title = l[9:].strip()
+                    break
+            else:
+                os.stderr.write('* can not find cmdhub title line in first 2' +
+                                'lines of autoload/{} *'.format(fn))
+                break
+
+            pair = (title, '#{} autoload/{}'.format(fn[-1], fn))
+            title_cmd_pairs.append(pair)
+
+        return title_cmd_pairs
 
     def print_titiles(self):
         print('\n'.join(self.core_dict.keys()))
