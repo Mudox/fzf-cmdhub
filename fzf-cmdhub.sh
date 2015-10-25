@@ -1,9 +1,8 @@
-#!/bin/bash
-
 FZF_CMDHUB_SH_PATH="$(dirname $0)"
 
 ch() {
-  if [ -z "$(which fzf)" ]; then
+  # check if the `fzf` is installed
+  if ! which fzf &>/dev/null; then
     printf "\e[31m* need [fzf], please install it first *\e[0m\n"
     return
   fi
@@ -15,7 +14,8 @@ ch() {
     local cmd="$(python ${py_path} -c ${selected_title})"
     if [ -n "$cmd" ]; then
       eval "$cmd"
+    else
+      echo "*fetched an empty content*"
     fi
   fi
 }
-
