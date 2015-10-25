@@ -92,9 +92,9 @@ Edit fzf-cmdhub data file\t\t${EDITOR:-vi} ~/.fzf-cmdhub
 
         title_cmd_pairs = []
 
-        files = glob.glob('*.[bes]')
+        files = glob.glob(self.AUTOLOAD_DIR + '/*.[bes]')
         if len(files) == 0:
-            return {}
+            return []
 
         for fn in files:
             # read first 2 lines
