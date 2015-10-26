@@ -103,15 +103,17 @@ Edit fzf-cmdhub data file\t\t${EDITOR:-vi} ~/.fzf-cmdhub
 
             # collect title if any
             for l in first_2_lines:
-                if l.startswith('#cmdhub: '):
-                    title = l[9:].strip()
+                if l.startswith('#cmdhub:'):
+                    title = l[8:].strip()
                     break
             else:
                 os.stderr.write('* can not find cmdhub title line in first 2' +
                                 'lines of autoload/{} *'.format(fn))
                 break
 
-            pair = (title, '#{} autoload/{}'.format(fn[-1], fn))
+            pair = (title,
+                    '#{} autoload/{}'.format(fn[-1],
+                                             os.path.basename(fn)))
             title_cmd_pairs.append(pair)
 
         return title_cmd_pairs
