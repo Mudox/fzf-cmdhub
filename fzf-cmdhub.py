@@ -59,7 +59,7 @@ Edit fzf-cmdhub data file\t\t${EDITOR:-vi} ~/.fzf-cmdhub
                     sys.stderr.write(
                         '* Found duplicate title: {} *\n'.format(sorted_titles[i]))
 
-            # hangle sharp lines
+            # handle sharp lines
             def translate_sharp_line(line):
                 line = line.strip()
 
@@ -98,13 +98,15 @@ Edit fzf-cmdhub data file\t\t${EDITOR:-vi} ~/.fzf-cmdhub
 
         for fn in files:
             # read first 2 lines
+            # title line must stay in the first 2 lines
             with open(fn) as fp:
                 first_2_lines = [fp.readline(), fp.readline()]
 
             # collect title if any
+            # sharp must start with '#cmdhub:' or '# cmdhub:'
             for l in first_2_lines:
-                if l.startswith('#cmdhub:'):
-                    title = l[8:].strip()
+                if re.match(u'#\s*cmdhub:', l):
+                    title = l[l.index(':') + 1:].strip()
                     break
             else:
                 os.stderr.write('* can not find cmdhub title line in first 2' +
