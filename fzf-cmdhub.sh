@@ -14,15 +14,25 @@ ch() {
 
   local py_path="${FZF_CMDHUB_SH_PATH}/fzf-cmdhub.py"
 
-  local selected_title="$(python ${py_path} -t \
-    | fzf -e --bind='ctrl-e:execute(env MDX_CHAMELEON_MODE=mini nvim ~/.fzf-cmdhub-menu)')"
+  local ret="$(python ${py_path} -t \
+    | $(__fzfcmd) \
+    --exact \
+    --header='Tip: press ctrl-e to edit this menu' \
+    --expect=ctrl-e \
+    )"
 
-  if [ -n "$selected_title" ]; then
-    local cmd="$(python ${py_path} -c ${selected_title})"
+  if [[ "$ret" =~ '^ctrl-e'  ]]; then
+    env MDX_CHAMELEON_MODE=mini nvim ~/.fzf-cmdhub-menu
+    ch
+  elif [[ "$ret" == '' ]]; then
+    return
+  else
+    local cmd="$(python ${py_path} -c ${ret#*$'\n'})"
     if [ -n "$cmd" ]; then
-      eval "$cmd"
+      printf "\e[35mexecuting: \e[34m$cmd\e[0m\n"
+      $cmd
     else
-      echo "* fetched an empty content *"
+      printf "\e[31mfechted an empty content\e[0m\n"
     fi
   fi
 }
