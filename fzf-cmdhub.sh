@@ -1,5 +1,10 @@
 FZF_CMDHUB_SH_PATH="$(dirname $0)"
 
+__fzfcmd() {
+  [ ${FZF_TMUX:-1} -eq 1 ] && echo "fzf-tmux -d${FZF_TMUX_HEIGHT:-40%}" \
+    || echo "fzf"
+}
+
 ch() {
   # check if the `fzf` is installed
   if ! which fzf &>/dev/null; then
