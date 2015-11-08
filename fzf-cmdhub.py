@@ -71,9 +71,9 @@ Edit fzf-cmdhub data file\t\t${EDITOR:-vi} ~/.fzf-cmdhub
                     line = re.sub(
                         r'^#e\s+', 'exec {}/'.format(self.JOBS_DIR),
                         line)
-                elif line.startswith('#b '):
+                elif line.startswith('#x '):
                     line = re.sub(
-                        r'^#b\s+', 'bash {}/'.format(self.JOBS_DIR),
+                        r'^#x\s+', '{}/'.format(self.JOBS_DIR),
                         line)
 
                 return line
@@ -92,7 +92,7 @@ Edit fzf-cmdhub data file\t\t${EDITOR:-vi} ~/.fzf-cmdhub
 
         title_cmd_pairs = []
 
-        files = glob.glob(self.AUTOLOAD_DIR + '/*.[bes]')
+        files = glob.glob(self.AUTOLOAD_DIR + '/*.[bex]')
         if len(files) == 0:
             return []
 
@@ -120,7 +120,7 @@ Edit fzf-cmdhub data file\t\t${EDITOR:-vi} ~/.fzf-cmdhub
 
         return title_cmd_pairs
 
-    def print_titiles(self):
+    def print_titles(self):
         print('\n'.join(self.core_dict.keys()))
 
     def print_cmd_for_title(self, title):
@@ -155,7 +155,7 @@ ns = ap.parse_args()
 
 the_hub = Hub()
 if ns.action is True:
-    the_hub.print_titiles()
+    the_hub.print_titles()
 else:
     the_hub.print_cmd_for_title(ns.action)
 
