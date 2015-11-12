@@ -30,7 +30,7 @@ ch() {
     local cmd="$(python ${py_path} -c ${ret#*$'\n'})"
     if [ -n "$cmd" ]; then
       printf "\e[35mexecuting: \e[34m$cmd\e[0m\n"
-      $cmd
+      eval $cmd
     else
       printf "\e[31mfechted an empty content\e[0m\n"
     fi
