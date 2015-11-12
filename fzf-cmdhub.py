@@ -8,9 +8,7 @@ import sys
 import argparse
 import glob
 
-# core class
-# {{{1
-
+# CORE CLASS                                                                           {{{1
 
 class Hub:
     DATA_FILE_TEMPLATE = '''\
@@ -92,7 +90,7 @@ Edit fzf-cmdhub data file\t\t${EDITOR:-vi} ~/.fzf-cmdhub
 
         title_cmd_pairs = []
 
-        files = glob.glob(self.AUTOLOAD_DIR + '/*.[bex]')
+        files = glob.glob(self.AUTOLOAD_DIR + '/*.[sex]')
         if len(files) == 0:
             return []
 
@@ -127,8 +125,8 @@ Edit fzf-cmdhub data file\t\t${EDITOR:-vi} ~/.fzf-cmdhub
         print(self.core_dict[title])
 # }}}1
 
-# command interface
-# {{{1
+# COMMAND INTERFACE                                                                    {{{1
+
 ap = argparse.ArgumentParser(
     prog='fzf-cmdhub',
     description='A fzf extension: cmdhub',
