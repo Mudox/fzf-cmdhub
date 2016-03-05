@@ -23,7 +23,6 @@ Edit fzf-cmdhub data file\t\t${EDITOR:-vi} ~/.fzf-cmdhub
 
     MENU_PATH = os.path.expanduser('~/.fzf-cmdhub-menu')
     JOBS_DIR = os.path.expanduser('~/.fzf-cmdhub-jobs')
-    AUTOLOAD_DIR = JOBS_DIR + '/autoload'
 
     # one or more Tabs separated line
     MENU_ITEM_PAT = r'^[^\t]+\t+[^\t]+$'
@@ -35,9 +34,6 @@ Edit fzf-cmdhub data file\t\t${EDITOR:-vi} ~/.fzf-cmdhub
         if not os.path.exists(self.MENU_PATH):
             with open(self.MENU_PATH, 'w') as f:
                 f.write(self.DATA_FILE_TEMPLATE)
-
-        if not os.path.exists(self.JOBS_DIR):
-            subprocess.call('mkdir -p' + self.AUTOLOAD_DIR, shell=True)
 
         with open(self.MENU_PATH, 'r') as data_file:
             lines = [
@@ -90,7 +86,7 @@ Edit fzf-cmdhub data file\t\t${EDITOR:-vi} ~/.fzf-cmdhub
 
         title_cmd_pairs = []
 
-        files = glob.glob(self.AUTOLOAD_DIR + '/*.[sex]')
+        files = glob.glob(self.JOBS_DIR + '/*.[sex]')
         if len(files) == 0:
             return []
 
