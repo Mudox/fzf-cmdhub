@@ -8,7 +8,9 @@ import sys
 import argparse
 import glob
 
-# CORE CLASS                                                                           {{{1
+# CORE CLASS
+# {{{1
+
 
 class Hub:
     DATA_FILE_TEMPLATE = '''\
@@ -115,13 +117,14 @@ Edit fzf-cmdhub data file\t\t${EDITOR:-vi} ~/.fzf-cmdhub
         return title_cmd_pairs
 
     def print_titles(self):
-        print('\n'.join(self.core_dict.keys()))
+        print('\n'.join(sorted(self.core_dict.keys())))
 
     def print_cmd_for_title(self, title):
         print(self.core_dict[title])
 # }}}1
 
-# COMMAND INTERFACE                                                                    {{{1
+# COMMAND INTERFACE
+# {{{1
 
 ap = argparse.ArgumentParser(
     prog='fzf-cmdhub',
