@@ -8,7 +8,7 @@ import sys
 import argparse
 import glob
 
-# CORE CLASS
+# CORE CLASS: Hub
 # {{{1
 
 
@@ -82,7 +82,7 @@ Edit fzf-cmdhub data file\t\t${EDITOR:-vi} ~/.fzf-cmdhub
 
     def autoload_pairs(self):
         """
-        parse files under .fzf-cmdhub-jobs/autoload
+        parse files under .fzf-cmdhub-jobs/
         return: a list of 2-tuple (title, cmd_line)
         """
 
@@ -94,7 +94,7 @@ Edit fzf-cmdhub data file\t\t${EDITOR:-vi} ~/.fzf-cmdhub
 
         for fn in files:
             # read first 2 lines
-            # title line must stay in the first 2 lines
+            # title line must appear within the first 2 lines
             with open(fn) as fp:
                 first_2_lines = [fp.readline(), fp.readline()]
 
@@ -106,12 +106,12 @@ Edit fzf-cmdhub data file\t\t${EDITOR:-vi} ~/.fzf-cmdhub
                     break
             else:
                 os.stderr.write('* can not find cmdhub title line in first 2' +
-                                'lines of autoload/{} *'.format(fn))
+                                'lines of {} *'.format(fn))
                 break
 
             pair = (title,
-                    '#{} autoload/{}'.format(fn[-1],
-                                             os.path.basename(fn)))
+                    '#{} {}'.format(fn[-1],
+                                    os.path.basename(fn)))
             title_cmd_pairs.append(pair)
 
         return title_cmd_pairs
