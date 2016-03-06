@@ -14,7 +14,8 @@ ch() {
     return
   fi
 
-  local py_path="${FZF_CMDHUB_SH_PATH}/fzf-cmdhub.py"
+  local py_path
+  py_path="${FZF_CMDHUB_SH_PATH}/fzf-cmdhub.py"
 
   # TODO!: refactor the ctrl-e behavior to edit the selected item whatever it is.
   local ret
@@ -25,24 +26,38 @@ ch() {
     --expect=ctrl-e,ctrl-t \
     )
 
+  local info where selected_line
+
   if [[ "$ret" =~ '^ctrl-e'  ]]; then
-    env MDX_CHAMELEON_MODE=mini nvim ~/.fzf-cmdhub-menu
+    selected_line=$(echo "$ret" | sed -n '2p')
+    info=$(python "${py_path}" -i "$selected_line")
+    where=$(echo "$info" | sed -n '2p')
+
+    if [[ "$where" = '<menu>' ]]; then
+      env MDX_CHAMELEON_MODE=mini nvim ~/.fzf-cmdhub-menu
+    else
+      env MDX_CHAMELEON_MODE=mini nvim "$where"
+    fi
     ch
   elif [[ "$ret" =~ '^ctrl-t'  ]]; then
-    # TODO!!: use localtime to generate random file name
-    # TODO!: make symlink between titles and random number file names
-    env MDX_CHAMELEON_MODE=mini nvim              \
-      -c 'cd ~/.fzf-cmdhub-jobs/'                 \
-      -c 'let fname = input("New Jobs File Name: ") ' \
-      -c 'exe "e " . fname' \
+    selected_line=$(echo "$ret" | sed -n '2p')
+    info=$(python "${py_path}" -i "$selected_line")
+    where=$(echo "$info" | sed -n '2p')
+
+    env MDX_CHAMELEON_MODE=mini nvim             \
+      -c 'cd ~/.fzf-cmdhub-jobs/'                \
+      -c 'let fname = input("new file name: ") ' \
+      -c 'exe "e " . fnameescape(fname)'         \
       -c 'unlet fname'
     ch
   elif [[ "$ret" == '' ]]; then
+    # user canceled
     return
   else
-    local cmd
-    cmd=$(python "${py_path}" -c "${ret#*$'\n'}")
-    if [[ -n "$cmd" ]]; then
+    info=$(python "${py_path}" -i "${ret#*$'\n'}")
+    cmd=$(echo "$info" | sed -n '1p')
+    where=$(echo "$info" | sed -n '2p')
+    if [[ -n "$info" ]]; then
       printf "\e[35mexecuting: \e[34m%s\e[0m\n" "$cmd"
       eval "$cmd"
     else

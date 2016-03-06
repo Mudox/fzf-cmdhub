@@ -13,7 +13,7 @@ import glob
 
 
 class Hub:
-    DATA_FILE_TEMPLATE = '''\
+    MENU_FILE_TEMPLATE = '''\
 # vim: noexpandtab list listchars=tab\:▸-
 
 # NOTE:
@@ -23,7 +23,7 @@ class Hub:
 Edit fzf-cmdhub data file\t\t${EDITOR:-vi} ~/.fzf-cmdhub
 '''
 
-    MENU_PATH = os.path.expanduser('~/.fzf-cmdhub-menu')
+    MENU_FILE_PATH = os.path.expanduser('~/.fzf-cmdhub-menu')
     JOBS_DIR = os.path.expanduser('~/.fzf-cmdhub-jobs')
 
     # one or more Tabs separated line
@@ -33,23 +33,26 @@ Edit fzf-cmdhub data file\t\t${EDITOR:-vi} ~/.fzf-cmdhub
     def __init__(self):
         # check menu file avalability
         # if not exists, create & populate it with initial content
-        if not os.path.exists(self.MENU_PATH):
-            with open(self.MENU_PATH, 'w') as f:
-                f.write(self.DATA_FILE_TEMPLATE)
+        if not os.path.exists(self.MENU_FILE_PATH):
+            with open(self.MENU_FILE_PATH, 'w') as f:
+                f.write(self.MENU_FILE_TEMPLATE)
 
-        with open(self.MENU_PATH, 'r') as data_file:
+        with open(self.MENU_FILE_PATH, 'r') as data_file:
             lines = [
                 l for l in data_file if re.match(
                     self.MENU_ITEM_PAT, l)]
 
-            title_cmd_pairs = map(
-                lambda l: re.split(
-                    self.SEP_PAT, l), lines)
+            # list of [<title>, <command>, 'menu'] lists
+            infos = []
+            for line in lines:
+                info = re.split(self.SEP_PAT, line)
+                info.append('<menu>')
+                infos.append(info)
 
-            title_cmd_pairs += self.autoload_pairs()
+            infos += self.autoload_infos()
 
             # check for duplicate title
-            sorted_titles = sorted([p[0] for p in title_cmd_pairs])
+            sorted_titles = sorted([p[0] for p in infos])
             for i in range(len(sorted_titles) - 1):
                 if sorted_titles[i] == sorted_titles[i + 1]:
                     sys.stderr.write(
@@ -61,27 +64,30 @@ Edit fzf-cmdhub data file\t\t${EDITOR:-vi} ~/.fzf-cmdhub
                 line = line.strip()
 
                 if line.startswith('#s '):
-                    line = re.sub(
-                        r'^#s\s+', 'source {}/'.format(self.JOBS_DIR),
-                        line)
+                    line = re.sub(r'^#s\s+', 'source ', line)
                 elif line.startswith('#e '):
-                    line = re.sub(
-                        r'^#e\s+', 'exec {}/'.format(self.JOBS_DIR),
-                        line)
+                    line = re.sub(r'^#e\s+', 'exec ', line)
                 elif line.startswith('#x '):
-                    line = re.sub(
-                        r'^#x\s+', '{}/'.format(self.JOBS_DIR),
-                        line)
+                    line = re.sub(r'^#x\s+', '', line)
 
                 return line
 
-            title_cmd_pairs = map(
-                lambda p: (p[0], translate_sharp_line(p[1])),
-                title_cmd_pairs)
+            for info in infos:
+                info[1] = translate_sharp_line(info[1])
 
-            self.core_dict = dict(title_cmd_pairs)
+            # core_dict is a dictionary of
+            #  'title': {
+            #    'cmd_line': <final command line to execute in shell when this
+            #                 item is selected'>,
+            #    'from'    : <'<menu>' or job_file_name>
+            self.core_dict = {}
+            for title, command, where in infos:
+                self.core_dict[title] = {
+                    'cmd_line': command,
+                    'from': where,
+                }
 
-    def autoload_pairs(self):
+    def autoload_infos(self):
         """
         parse files under .fzf-cmdhub-jobs/
         return: a list of 2-tuple (title, cmd_line)
@@ -93,6 +99,7 @@ Edit fzf-cmdhub data file\t\t${EDITOR:-vi} ~/.fzf-cmdhub
         if len(files) == 0:
             return []
 
+        infos = []
         for fname in files:
             # read first 2 lines
             # title line must appear within the first 2 lines
@@ -117,21 +124,18 @@ Edit fzf-cmdhub data file\t\t${EDITOR:-vi} ~/.fzf-cmdhub
                                 'lines of {} *\n'.format(fname))
                 break
 
-            pair = (title,
-                    '#{} {}'.format(run_way,
-                                    os.path.basename(fname)))
-            title_cmd_pairs.append(pair)
+            info = [title, '#{} {}'.format(run_way, fname), fname]
+            infos.append(info)
 
-        with open('/tmp/cmdhub.log', mode='w') as f:
-            f.write(str(title_cmd_pairs))
-
-        return title_cmd_pairs
+        return infos
 
     def print_titles(self):
         print('\n'.join(sorted(self.core_dict.keys())))
 
-    def print_cmd_for_title(self, title):
-        print(self.core_dict[title])
+    def print_info_for_title(self, title):
+        print(self.core_dict[title]['cmd_line'])
+        print(self.core_dict[title]['from'])
+
 # }}}1
 
 # COMMAND INTERFACE
@@ -153,8 +157,8 @@ grp.add_argument(
 )
 
 grp.add_argument(
-    '-c',
-    '--cmd-for',
+    '-i',
+    '--info-for',
     metavar='TITLE',
     dest='action',
 )
@@ -165,7 +169,7 @@ the_hub = Hub()
 if ns.action is True:
     the_hub.print_titles()
 else:
-    the_hub.print_cmd_for_title(ns.action)
+    the_hub.print_info_for_title(ns.action)
 
 # }}}1
 
