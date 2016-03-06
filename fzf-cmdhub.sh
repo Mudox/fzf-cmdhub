@@ -19,11 +19,11 @@ ch() {
 
   # TODO!: refactor the ctrl-e behavior to edit the selected item whatever it is.
   local ret
-  ret=$(python "${py_path}" -t \
-    | $(__fzfcmd) \
-    --exact \
+  ret=$(python "${py_path}" -t                     \
+    | $(__fzfcmd)                                  \
+    --exact                                        \
     --header='Tip: press ctrl-e to edit this menu' \
-    --expect=ctrl-e,ctrl-t \
+    --expect=ctrl-e,ctrl-t                         \
     )
 
   local info where selected_line
@@ -34,21 +34,21 @@ ch() {
     where=$(echo "$info" | sed -n '2p')
 
     if [[ "$where" = '<menu>' ]]; then
-      env MDX_CHAMELEON_MODE=mini nvim ~/.fzf-cmdhub-menu
+      eval "${FZF_CMDHUB_EDITOR:-vim} ~/.fzf-cmdhub-menu"
     else
-      env MDX_CHAMELEON_MODE=mini nvim "$where"
+      eval "${FZF_CMDHUB_EDITOR:-vim} \"$where\""
     fi
     ch
-  elif [[ "$ret" =~ '^ctrl-t'  ]]; then
+  elif [[ "$ret" =~ '^ctrl-t' ]]; then
     selected_line=$(echo "$ret" | sed -n '2p')
     info=$(python "${py_path}" -i "$selected_line")
     where=$(echo "$info" | sed -n '2p')
 
-    env MDX_CHAMELEON_MODE=mini nvim             \
-      -c 'cd ~/.fzf-cmdhub-jobs/'                \
-      -c 'let fname = input("new file name: ") ' \
-      -c 'exe "e " . fnameescape(fname)'         \
-      -c 'unlet fname'
+    eval "${FZF_CMDHUB_EDITOR:-vim}                \
+      -c 'cd ~/.fzf-cmdhub-jobs/'                  \
+      -c 'let fname = input(\"new file name: \") ' \
+      -c 'exe \"e \" . fnameescape(fname)'           \
+      -c 'unlet fname'"
     ch
   elif [[ "$ret" == '' ]]; then
     # user canceled
