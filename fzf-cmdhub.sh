@@ -22,11 +22,20 @@ ch() {
     | $(__fzfcmd) \
     --exact \
     --header='Tip: press ctrl-e to edit this menu' \
-    --expect=ctrl-e \
-    )"
+    --expect=ctrl-e,ctrl-t \
+    )
 
   if [[ "$ret" =~ '^ctrl-e'  ]]; then
     env MDX_CHAMELEON_MODE=mini nvim ~/.fzf-cmdhub-menu
+    ch
+  elif [[ "$ret" =~ '^ctrl-t'  ]]; then
+    # TODO!!: use localtime to generate random file name
+    # TODO!: make symlink between titles and random number file names
+    env MDX_CHAMELEON_MODE=mini nvim              \
+      -c 'cd ~/.fzf-cmdhub-jobs/'                 \
+      -c 'let fname = input("New Jobs File Name: ") ' \
+      -c 'exe "e " . fname' \
+      -c 'unlet fname'
     ch
   elif [[ "$ret" == '' ]]; then
     return
