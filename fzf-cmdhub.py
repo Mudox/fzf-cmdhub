@@ -53,7 +53,8 @@ Edit fzf-cmdhub data file\t\t${EDITOR:-vi} ~/.fzf-cmdhub
             for i in range(len(sorted_titles) - 1):
                 if sorted_titles[i] == sorted_titles[i + 1]:
                     sys.stderr.write(
-                        '* Found duplicate title: {} *\n'.format(sorted_titles[i]))
+                        '* found duplicate title: {} *\n'.format(
+                            sorted_titles[i]))
 
             # handle sharp lines
             def translate_sharp_line(line):
@@ -88,31 +89,41 @@ Edit fzf-cmdhub data file\t\t${EDITOR:-vi} ~/.fzf-cmdhub
 
         title_cmd_pairs = []
 
-        files = glob.glob(self.JOBS_DIR + '/*.[sex]')
+        files = glob.glob(self.JOBS_DIR + '/*')
         if len(files) == 0:
             return []
 
-        for fn in files:
+        for fname in files:
             # read first 2 lines
             # title line must appear within the first 2 lines
-            with open(fn) as fp:
+            with open(fname) as fp:
                 first_2_lines = [fp.readline(), fp.readline()]
 
             # collect title if any
-            # sharp must start with '#cmdhub:' or '# cmdhub:'
+            # sharp must start with '#[s|e|x] cmdhub:'
+            # where
+            #   #s - source $job_file_name
+            #   #e - exec $job_file_name
+            #   #x - $job_file_name (assuming the job file has shebang line,
+            #        or can be run by system automatically)
             for l in first_2_lines:
-                if re.match(u'#\s*cmdhub:', l):
-                    title = l[l.index(':') + 1:].strip()
+                m = re.match(u'^\s*#([sex])\s+cmdhub:(.*)$', l)
+                if m:
+                    run_way = m.group(1)
+                    title = m.group(2).strip()
                     break
             else:
                 os.stderr.write('* can not find cmdhub title line in first 2' +
-                                'lines of {} *'.format(fn))
+                                'lines of {} *\n'.format(fname))
                 break
 
             pair = (title,
-                    '#{} {}'.format(fn[-1],
-                                    os.path.basename(fn)))
+                    '#{} {}'.format(run_way,
+                                    os.path.basename(fname)))
             title_cmd_pairs.append(pair)
+
+        with open('/tmp/cmdhub.log', mode='w') as f:
+            f.write(str(title_cmd_pairs))
 
         return title_cmd_pairs
 
