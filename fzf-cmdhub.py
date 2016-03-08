@@ -1,6 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+# IDEA: fzf support ansi code hangling, so we can colorize icon columns.
+# TODO!: add icon columns to fzf item lines.
+# TODO!!!: use pytest add test suites
+# TODO!!!: move it into a virtualenv
+# TODO!!!: make it a pure python package
+# TODO!: publish it to PyPI
+
 import os
 import re
 import subprocess
@@ -172,9 +179,5 @@ else:
     the_hub.print_info_for_title(ns.action)
 
 # }}}1
-
-# for test
-# the_hub = Hub()
-# print('\n'.join(the_hub.core_dict.values()))
 
 # vim: foldmethod=marker
