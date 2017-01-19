@@ -21,7 +21,7 @@ ch() {
   local ret
   ret=$(python "${py_path}" -t                     \
     | $(__fzfcmd)                                  \
-    --exact                                        \
+    --extended-exact                               \
     --header='Tip: press ctrl-e to edit this menu' \
     --expect=ctrl-e,ctrl-t                         \
     )
