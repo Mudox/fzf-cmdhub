@@ -2,11 +2,6 @@
 
 FZF_CMDHUB_SH_PATH=$(dirname "$0")
 
-__fzfcmd() {
-  [ "${FZF_TMUX:-1}" -eq 1 ] && echo "fzf-tmux -d${FZF_TMUX_HEIGHT:-40%}" \
-    || echo "fzf"
-}
-
 ch() {
   # check if the `fzf` is installed
   if ! which fzf &>/dev/null; then
@@ -19,11 +14,12 @@ ch() {
 
   # TODO!: refactor the ctrl-e behavior to edit the selected item whatever it is.
   local ret
-  ret=$(python "${py_path}" -t                     \
-    | $(__fzfcmd)                                  \
-    --extended-exact                               \
-    --header='Tip: press ctrl-e to edit this menu' \
-    --expect=ctrl-e,ctrl-t                         \
+  ret=$(python "${py_path}" -t                                                             \
+    | fzf                                                                                  \
+    --height=30% --min-height=20                                                           \
+    --border --margin=1                                                                    \
+    --header='Tip: ctrl-e to edit the file behind current item; ctrl-t to create new item' \
+    --expect=ctrl-e,ctrl-t                                                                 \
     )
 
   local info where selected_line
