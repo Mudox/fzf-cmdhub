@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-FZF_CMDHUB_SH_PATH=$(dirname "$0")
+SDIR=$(dirname $(test -L "$0" && readlink -e "$0" || echo "$0"))
+CONFIG_DIR="~/.config/fzf-cmdhub"
+
 
 ch() {
   # check if the `fzf` is installed
@@ -10,7 +12,7 @@ ch() {
   fi
 
   local py_path
-  py_path="${FZF_CMDHUB_SH_PATH}/fzf-cmdhub.py"
+  py_path="${SDIR}/fzf-cmdhub.py"
 
   # TODO!: refactor the ctrl-e behavior to edit the selected item whatever it is.
   local ret
@@ -30,7 +32,7 @@ ch() {
     where=$(echo "$info" | sed -n '2p')
 
     if [[ "$where" = '<menu>' ]]; then
-      eval "${FZF_CMDHUB_EDITOR:-vim} ~/.fzf-cmdhub-menu"
+      eval "${FZF_CMDHUB_EDITOR:-vim} \"${CONFIG_DIR}/menu\""
     else
       eval "${FZF_CMDHUB_EDITOR:-vim} \"$where\""
     fi
@@ -41,9 +43,9 @@ ch() {
     where=$(echo "$info" | sed -n '2p')
 
     eval "${FZF_CMDHUB_EDITOR:-vim}                \
-      -c 'cd ~/.fzf-cmdhub-jobs/'                  \
+      -c 'cd ${CONFIG_DIR}/tasks'                  \
       -c 'let fname = input(\"new file name: \") ' \
-      -c 'exe \"e \" . fnameescape(fname)'           \
+      -c 'exe \"e \" . fnameescape(fname)'         \
       -c 'unlet fname'"
     ch
   elif [[ "$ret" == '' ]]; then

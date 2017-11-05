@@ -30,8 +30,8 @@ class Hub:
 Edit fzf-cmdhub data file\t\t${EDITOR:-vi} ~/.fzf-cmdhub
 '''
 
-    MENU_FILE_PATH = os.path.expanduser('~/.fzf-cmdhub-menu')
-    JOBS_DIR = os.path.expanduser('~/.fzf-cmdhub-jobs')
+    MENU_DIR = os.path.expanduser('~/.config/fzf-cmdhub/menu')
+    TASKS_DIR = os.path.expanduser('~/.config/fzf-cmdhub/tasks')
 
     # one or more Tabs separated line
     MENU_ITEM_PAT = r'^[^\t]+\t+[^\t]+$'
@@ -40,11 +40,11 @@ Edit fzf-cmdhub data file\t\t${EDITOR:-vi} ~/.fzf-cmdhub
     def __init__(self):
         # check menu file avalability
         # if not exists, create & populate it with initial content
-        if not os.path.exists(self.MENU_FILE_PATH):
-            with open(self.MENU_FILE_PATH, 'w') as f:
+        if not os.path.exists(self.MENU_DIR):
+            with open(self.MENU_DIR, 'w') as f:
                 f.write(self.MENU_FILE_TEMPLATE)
 
-        with open(self.MENU_FILE_PATH, 'r') as data_file:
+        with open(self.MENU_DIR, 'r') as data_file:
             lines = [
                 l for l in data_file if re.match(
                     self.MENU_ITEM_PAT, l)]
@@ -96,13 +96,13 @@ Edit fzf-cmdhub data file\t\t${EDITOR:-vi} ~/.fzf-cmdhub
 
     def autoload_infos(self):
         """
-        parse files under .fzf-cmdhub-jobs/
+        parse files under `fzf-cmdhub/tasks/`
         return: a list of 2-tuple (title, cmd_line)
         """
 
         title_cmd_pairs = []
 
-        files = glob.glob(self.JOBS_DIR + '/*')
+        files = glob.glob(self.TASKS_DIR + '/*')
         if len(files) == 0:
             return []
 
